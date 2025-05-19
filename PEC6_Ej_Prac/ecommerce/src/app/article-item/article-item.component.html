@@ -4,14 +4,15 @@
   }">
     <div class="d-flex align-items-center">
         <!-- Imagen del artículo -->
-        <img [src]="article.imageUrl" alt="{{ article.name }}" class="rounded me-4 article-image" />
+        <img [src]="article.imageUrl | defaultImage" alt="{{ article.name }}" class="rounded me-4 article-image" />
+
 
         <!-- Información del artículo -->
         <div class="flex-grow-1">
             <h5 class="mb-2 fw-semibold">
                 {{ article.name }}
                 <span class="ms-2" [ngClass]="{ 'text-muted': !article.isOnSale }">
-                    {{ article.price }}€
+                    {{ article.price | number:'1.2-2' }}€
                 </span>
             </h5>
 

@@ -55,6 +55,7 @@ export class ArticleListComponent {
   // Emits strings when user introduces something new
   filter$ = new Subject<string>();
   articles$: Observable<Article[]>;
+  currentFilter = '';
 
   // Service injection
   constructor(private articleService: ArticleService) {
@@ -67,15 +68,18 @@ export class ArticleListComponent {
     );
   }
 
-  // Same as Exercise 2
   onQuantityChange(change: ArticleQuantityChange) {
     this.articleService
       .changeQuantity(change.article.id, change.quantityChange)
-      .subscribe();
+      .subscribe(() => {
+        // Updates the article list
+        this.filter$.next(this.currentFilter || '');
+      });
   }
 
   // Emits the introduced string to all the Subjects and Observables
   onFilterChange(text: string) {
+    this.currentFilter = text;
     this.filter$.next(text);
   }
 }
