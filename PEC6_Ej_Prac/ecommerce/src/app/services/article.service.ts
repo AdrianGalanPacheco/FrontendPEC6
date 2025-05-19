@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Article } from '../models/article';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ArticleService {
+  
+  /*
+  // EXERCISE 2
   // BehaviourSubject observable to store the articles
   private articles: BehaviorSubject<Article[]> = new BehaviorSubject<Article[]>(
     [
@@ -39,7 +42,8 @@ export class ArticleService {
       },
     ]
   );
-
+  */
+  /*
   // Returns an observable of articles
   getArticles(): Observable<Article[]> {
     return this.articles.asObservable();
@@ -80,5 +84,32 @@ export class ArticleService {
     this.articles.next([...this.articles.value, newArticle]);
     // Returns the new article
     return of(newArticle);
+  }
+  */
+
+  // Exercise 4
+  // URL of the API
+  apiUrl = 'http://localhost:3000/api/articles';
+
+  constructor(private http: HttpClient) {}
+
+  // Returns an observable of articles
+  getArticles(filter: string = ''): Observable<Article[]> {
+    // If filter is not empty, params will be equal to ?q=query. If filter is empty, there won't be params
+    const params = filter ? new HttpParams().set('q', filter) : undefined;
+    // GET request to the URL of the API
+    return this.http.get<Article[]>(this.apiUrl, { params });
+  }
+
+  // Returns an observable of the updated article
+  changeQuantity(articleID: number, changeInQuantity: number): Observable<any> {
+    // PATCH request to the URL of the API
+    return this.http.patch(`${this.apiUrl}/${articleID}`, { changeInQuantity });
+  }
+
+  // Returns an observable with the new article
+  create(article: Article): Observable<Article> {
+    // POST request to the URL of the API
+    return this.http.post<Article>(this.apiUrl, article);
   }
 }

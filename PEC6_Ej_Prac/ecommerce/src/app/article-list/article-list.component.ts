@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Article } from '../models/article';
 import { ArticleQuantityChange } from '../models/article-quantity-change';
-import { Observable } from 'rxjs';
+import { Observable, Subject, switchMap, startWith } from 'rxjs';
 import { ArticleService } from '../services/article.service';
 
 @Component({
@@ -9,6 +9,16 @@ import { ArticleService } from '../services/article.service';
   template: `
     <div class="container mt-4">
       <h1 class="text-center mb-4">Lista de artículos</h1>
+      <!-- Input field -->
+      <div class="mb-4 d-flex justify-content-center">
+        <input
+          type="text"
+          (input)="onFilterChange($event.target.value)"
+          placeholder="Search article..."
+          class="form-control w-50"
+          style="max-width: 400px;"
+        />
+      </div>
       <div class="row">
         <!-- async pipe to subscribe to the articles observable -->
         <div class="col-md-4 mb-3" *ngFor="let article of articles$ | async">
@@ -23,6 +33,8 @@ import { ArticleService } from '../services/article.service';
   styles: [],
 })
 export class ArticleListComponent {
+  /*
+  // Exercise 2
   // New observable
   articles$: Observable<Article[]>;
 
@@ -36,5 +48,34 @@ export class ArticleListComponent {
     this.articleService
       .changeQuantity(change.article.id, change.quantityChange)
       .subscribe();
+  }
+  */
+
+  // Exercise 4
+  // Emits strings when user introduces something new
+  filter$ = new Subject<string>();
+  articles$: Observable<Article[]>;
+
+  // Service injection
+  constructor(private articleService: ArticleService) {
+    // Use of pipe to transform and manage filter emitted values.
+    this.articles$ = this.filter$.pipe(
+      // Emit empty value to get all the articles
+      startWith(''),
+      // Every time filter emits a new value, cancel previous requests, calls the API and emit the new value of article
+      switchMap((filter) => this.articleService.getArticles(filter))
+    );
+  }
+
+  // Same as Exercise 2
+  onQuantityChange(change: ArticleQuantityChange) {
+    this.articleService
+      .changeQuantity(change.article.id, change.quantityChange)
+      .subscribe();
+  }
+
+  // Emits the introduced string to all the Subjects and Observables
+  onFilterChange(text: string) {
+    this.filter$.next(text);
   }
 }
